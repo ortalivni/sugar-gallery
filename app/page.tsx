@@ -29,7 +29,8 @@ export default function GalleryPage() {
   const filtered = useMemo(() => {
     return images.filter(img => {
       const matchesTag = !activeTag || img.tags.includes(activeTag);
-      const matchesSearch = !search || img.tags.some(t => t.includes(search)) || img.name.includes(search);
+      const q = search.toLowerCase();
+      const matchesSearch = !search || img.tags.some(t => t.toLowerCase().includes(q)) || img.name.toLowerCase().includes(q);
       return matchesTag && matchesSearch;
     });
   }, [images, activeTag, search]);
