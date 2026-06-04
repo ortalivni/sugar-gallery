@@ -1,65 +1,194 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState, useMemo } from 'react';
+import type { GalleryImage } from './api/images/route';
+
+const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '972547450606';
+
+export default function GalleryPage() {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [selected, setSelected] = useState<GalleryImage | null>(null);
+
+  useEffect(() => {
+    fetch('/api/images')
+      .then(r => r.json())
+      .then(data => { setImages(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setError('שגיאה בטעינת התמונות'); setLoading(false); });
+  }, []);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    images.forEach(img => img.tags.forEach(t => set.add(t)));
+    return [...set].sort((a, b) => a.localeCompare(b, 'he'));
+  }, [images]);
+
+  const filtered = useMemo(() => {
+    return images.filter(img => {
+      const matchesTag = !activeTag || img.tags.includes(activeTag);
+      const matchesSearch = !search || img.tags.some(t => t.includes(search)) || img.name.includes(search);
+      return matchesTag && matchesSearch;
+    });
+  }, [images, activeTag, search]);
+
+  const waLink = (img: GalleryImage) => {
+    const text = encodeURIComponent(`היי אורטל! אני מעוניינת בדף הסוכר הזה: ${img.tags[0] ?? img.name}\n${img.url}`);
+    return `https://wa.me/${WA_NUMBER}?text=${text}`;
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-gradient-to-l from-pink-400 to-purple-500 text-white shadow-md sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+          <span className="text-3xl">🍰</span>
+          <div>
+            <h1 className="text-xl font-bold leading-tight">דפי סוכר</h1>
+            <p className="text-pink-100 text-sm">אורטל לבני</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Search */}
+        <div className="relative mb-4">
+          <span className="absolute top-1/2 -translate-y-1/2 end-3 text-gray-400 text-lg">🔍</span>
+          <input
+            type="text"
+            placeholder="חפשי לפי קטגוריה..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setActiveTag(null); }}
+            className="w-full bg-white border border-purple-200 rounded-2xl px-4 py-3 pe-10 text-base shadow-sm focus:outline-none focus:border-purple-400"
+          />
+        </div>
+
+        {/* Tag chips */}
+        {allTags.length > 0 && (
+          <div className="flex gap-2 flex-wrap mb-6">
+            <button
+              onClick={() => { setActiveTag(null); setSearch(''); }}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                !activeTag && !search
+                  ? 'bg-purple-500 text-white shadow'
+                  : 'bg-white text-purple-600 border border-purple-200 hover:border-purple-400'
+              }`}
+            >
+              הכל
+            </button>
+            {allTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => { setActiveTag(tag); setSearch(''); }}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  activeTag === tag
+                    ? 'bg-purple-500 text-white shadow'
+                    : 'bg-white text-purple-600 border border-purple-200 hover:border-purple-400'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Results count */}
+        {!loading && !error && (
+          <p className="text-sm text-gray-400 mb-4">{filtered.length} עיצובים</p>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="w-10 h-10 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+            <p className="text-purple-400">טוענת עיצובים...</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && <p className="text-center text-red-500 py-12">{error}</p>}
+
+        {/* Empty */}
+        {!loading && !error && filtered.length === 0 && (
+          <div className="text-center py-24">
+            <div className="text-5xl mb-4">🔍</div>
+            <p className="text-gray-400">לא נמצאו עיצובים תואמים</p>
+          </div>
+        )}
+
+        {/* Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {filtered.map(img => (
+            <div
+              key={img.id}
+              onClick={() => setSelected(img)}
+              className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 border border-pink-50"
+            >
+              <div className="aspect-square overflow-hidden">
+                <img
+                  src={img.url}
+                  alt={img.tags[0] ?? img.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+              <div className="px-2 py-1.5">
+                <p className="text-xs text-gray-500 truncate">{img.tags[0] ?? ''}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {selected && (
+        <div
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-2xl"
+            onClick={e => e.stopPropagation()}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <img
+              src={selected.url}
+              alt={selected.tags[0] ?? selected.name}
+              className="w-full max-h-[60vh] object-contain bg-gray-50"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="p-5">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {selected.tags.map(t => (
+                  <span key={t} className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-medium">
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <a
+                href={waLink(selected)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-2xl text-base transition-colors shadow"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.12 1.523 5.851L0 24l6.335-1.508A11.933 11.933 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.012-1.374l-.36-.214-3.76.895.952-3.667-.234-.376A9.818 9.818 0 1112 21.818z"/>
+                </svg>
+                שלחי לי בוואטסאפ
+              </a>
+
+              <button
+                onClick={() => setSelected(null)}
+                className="w-full mt-2 py-2 text-sm text-gray-400 hover:text-gray-600"
+              >
+                סגור
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
