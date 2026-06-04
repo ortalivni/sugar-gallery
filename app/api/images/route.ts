@@ -16,12 +16,12 @@ export interface GalleryImage {
 
 export async function GET() {
   try {
-    const result = await cloudinary.search
-      .expression('folder:sugar-pages/*')
-      .with_field('tags')
-      .sort_by('created_at', 'desc')
-      .max_results(500)
-      .execute();
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'sugar-pages/',
+      max_results: 500,
+      tags: true,
+    });
 
     const images: GalleryImage[] = result.resources.map((r: any) => ({
       id: r.public_id,
