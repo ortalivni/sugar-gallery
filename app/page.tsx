@@ -97,15 +97,15 @@ export default function GalleryPage() {
             />
           </div>
 
-          {/* Mobile tags */}
-          <div className="flex gap-2 flex-wrap mb-4 md:hidden">
+          {/* Mobile tags — scrollable row */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-4 md:hidden scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <button onClick={() => { setActiveTag(null); setSearch(''); }}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${!activeTag && !search ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border border-purple-200'}`}>
+              className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-all ${!activeTag && !search ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border border-purple-200'}`}>
               הכל
             </button>
             {allTags.map(tag => (
               <button key={tag} onClick={() => { setActiveTag(tag); setSearch(''); }}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${activeTag === tag ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border border-purple-200'}`}>
+                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-all ${activeTag === tag ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border border-purple-200'}`}>
                 {tag}
               </button>
             ))}
