@@ -98,9 +98,9 @@ export default function GalleryPage() {
               הכל
             </button>
             <button
-              onClick={() => { setSearch('עוגות גן'); setActiveTag(null); }}
+              onClick={() => { setActiveTag('עוגת גן'); setSearch(''); }}
               className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
-                search === 'עוגות גן'
+                activeTag === 'עוגת גן'
                   ? 'bg-pink-500 text-white'
                   : 'bg-pink-50 text-pink-600 border border-pink-200 hover:bg-pink-100'
               }`}
