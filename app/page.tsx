@@ -88,10 +88,20 @@ export default function GalleryPage() {
           {/* Featured category buttons */}
           <div className="flex gap-3 mb-4">
             <button
-              onClick={() => { setActiveTag('עוגות גן'); setSearch(''); }}
+              onClick={() => { setActiveTag(null); setSearch(''); }}
               className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
-                activeTag === 'עוגות גן'
-                  ? 'bg-pink-500 text-white shadow-pink-200'
+                !activeTag && !search
+                  ? 'bg-slate-700 text-white'
+                  : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+              }`}
+            >
+              הכל
+            </button>
+            <button
+              onClick={() => { setSearch('עוגות גן'); setActiveTag(null); }}
+              className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
+                search === 'עוגות גן'
+                  ? 'bg-pink-500 text-white'
                   : 'bg-pink-50 text-pink-600 border border-pink-200 hover:bg-pink-100'
               }`}
             >
@@ -101,7 +111,7 @@ export default function GalleryPage() {
               onClick={() => { setActiveTag('חיתוך'); setSearch(''); }}
               className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
                 activeTag === 'חיתוך'
-                  ? 'bg-purple-500 text-white shadow-purple-200'
+                  ? 'bg-purple-500 text-white'
                   : 'bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100'
               }`}
             >
