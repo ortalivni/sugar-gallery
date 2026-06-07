@@ -169,22 +169,20 @@ export default function GalleryPage() {
             </div>
           )}
 
-          {/* Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {/* Masonry Grid */}
+          <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
             {filtered.map(img => (
               <div
                 key={img.id}
                 onClick={() => setSelected(img)}
-                className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 border border-pink-50"
+                className="break-inside-avoid group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-pink-50 mb-3"
               >
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={img.url}
-                    alt={img.tags[0] ?? img.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
+                <img
+                  src={img.url}
+                  alt={img.tags[0] ?? img.name}
+                  className="w-full h-auto block group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
                 <div className="px-2 py-1.5">
                   <p className="text-xs text-gray-500 truncate">{img.tags[0] ?? ''}</p>
                 </div>
