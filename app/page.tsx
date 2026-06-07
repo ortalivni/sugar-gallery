@@ -85,6 +85,30 @@ export default function GalleryPage() {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
+          {/* Featured category buttons */}
+          <div className="flex gap-3 mb-4">
+            <button
+              onClick={() => { setActiveTag('עוגות גן'); setSearch(''); }}
+              className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
+                activeTag === 'עוגות גן'
+                  ? 'bg-pink-500 text-white shadow-pink-200'
+                  : 'bg-pink-50 text-pink-600 border border-pink-200 hover:bg-pink-100'
+              }`}
+            >
+              🎂 עוגות גן
+            </button>
+            <button
+              onClick={() => { setActiveTag('חיתוך'); setSearch(''); }}
+              className={`flex-1 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm ${
+                activeTag === 'חיתוך'
+                  ? 'bg-purple-500 text-white shadow-purple-200'
+                  : 'bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100'
+              }`}
+            >
+              ✂️ דפי חיתוך
+            </button>
+          </div>
+
           {/* Search */}
           <div className="relative mb-4">
             <span className="absolute top-1/2 -translate-y-1/2 end-3 text-gray-400 text-lg">🔍</span>
