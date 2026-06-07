@@ -31,7 +31,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(images, {
-      headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate' },
+      headers: { 'Cache-Control': 'no-store' },
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
